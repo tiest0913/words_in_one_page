@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>歌詞排版器</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+        
+        #controls { background: #fff; color: #333; padding: 20px; border-radius: 12px; width: 850px; margin-bottom: 20px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input[type="text"] { width: 100%; padding: 12px; font-size: 18px; margin-bottom: 10px; box-sizing: border-box; border: 2px solid #007bff; border-radius: 6px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        #paper {
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            color: black;
+            padding: 12mm 15mm;
+            box-sizing: border-box;
+            display: flex;
+            gap: 12mm;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: hidden;
+        }
+
+        .lyrics-title { font-weight: 900; margin-bottom: 0.3em; display: block; line-height: 1.1; }
+
+        button { padding: 12px 25px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 6px; }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            #controls { display: none; }
+            #paper { margin: 0; border: none; box-shadow: none; width: 210mm; height: 297mm; }
+            html, body { height: 297mm; overflow: hidden; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <input type="text" id="titleInput" placeholder="歌曲標題">
+    <textarea id="lyricsInput" placeholder="貼上歌詞..."></textarea>
+    <button onclick="calculateLayout()">🚀 產生排版</button>
+    <button onclick="window.print()" style="background: #28a745; margin-left:10px;">🖨️ 列印</button>
+    <p id="info" style="margin: 10px 0 0; color: #666; font-size: 14px;"></p>
+</div>
+
+<div id="paper">
+    <div id="col1" class="column"></div>
+    <div id="col2" class="column"></div>
+</div>
+
+<script>
+function calculateLayout() {
+    const titleText = document.getElementById('titleInput').value.trim();
+    const lyricsText = document.getElementById('lyricsInput').value.trim();
+    if (!lyricsText) return;
+
+    const col1 = document.getElementById('col1');
+    const col2 = document.getElementById('col2');
+    const lines = lyricsText.split('\n');
+    
+    // 測試函式
+    function testLayout(fontSize, useDouble) {
+        col1.style.fontSize = fontSize + "px";
+        col2.style.fontSize = fontSize + "px";
+        const mid = Math.ceil(lines.length / 2);
+        
+        if (useDouble) {
+            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
+            col2.innerHTML = lines.slice(mid).join('\n');
+        } else {
+            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
+            col2.innerHTML = '';
+        }
+        return col1.scrollHeight <= col1.clientHeight && col2.scrollHeight <= col2.clientHeight;
+    }
+
+    // 1. 算出單欄能做到的最大字體
+    let sMin = 10, sMax = 100, bestS = 10;
+    while(sMin <= sMax) {
+        let m = Math.floor((sMin+sMax)/2);
+        if(testLayout(m, false)) { bestS = m; sMin = m+1; } else { sMax = m-1; }
+    }
+
+    // 2. 算出雙欄能做到的最大字體
+    let dMin = 10, dMax = 100, bestD = 10;
+    while(dMin <= dMax) {
+        let m = Math.floor((dMin+dMax)/2);
+        if(testLayout(m, true)) { bestD = m; dMin = m+1; } else { dMax = m-1; }
+    }
+
+    // 3. 決策邏輯：
+    // 只有當「雙欄字體」明顯大於「單欄字體」時 (例如大過 4px)，才切換成雙欄。
+    // 這樣可以避免明明單欄字體已經夠大(如30px)，卻因為雙欄能到32px而切換。
+    let finalSize, finalDouble;
+    if (bestD > bestS + 4) {
+        finalSize = bestD;
+        finalDouble = true;
+    } else {
+        finalSize = bestS;
+        finalDouble = false;
+    }
+
+    testLayout(finalSize, finalDouble);
+    document.getElementById('info').innerText = `目前狀態：${finalDouble ? '雙欄' : '單欄'}排版 | 歌詞字體: ${finalSize}px`;
+}
+</script>
+
+</body>
+</html>
