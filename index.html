@@ -139,12 +139,24 @@ function calculateLayout() {
         col2.style.fontSize = fontSize + "px";
         const mid = Math.ceil(lines.length / 2);
         
+        const createTitleSpan = (text, size) => {
+            const span = document.createElement('span');
+            span.className = 'lyrics-title';
+            span.style.fontSize = (size + 5) + 'px';
+            span.textContent = text;
+            return span;
+        };
+
+        col1.innerHTML = '';
+        col2.innerHTML = '';
+
         if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
-            col2.innerHTML = lines.slice(mid).join('\n');
+            col1.appendChild(createTitleSpan(titleText, fontSize));
+            col1.appendChild(document.createTextNode(lines.slice(0, mid).join('\n')));
+            col2.appendChild(document.createTextNode(lines.slice(mid).join('\n')));
         } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
-            col2.innerHTML = '';
+            col1.appendChild(createTitleSpan(titleText, fontSize));
+            col1.appendChild(document.createTextNode(lines.join('\n')));
         }
         
         return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
