@@ -4,34 +4,34 @@
     <meta charset="UTF-8">
     <title>歌詞排版器 - Vibe Coding 版</title>
     <style>
-        html, body { 
-            margin: 0; 
-            padding: 0; 
-            min-height: 100%; 
-            background: #1a1a1a; 
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: #1a1a1a;
         }
-        body { 
-            font-family: "Microsoft JhengHei", sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px 0; 
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
         }
-        
-        #controls { 
-            background: #fff; 
-            color: #333; 
-            padding: 20px; 
-            border-radius: 12px; 
-            width: 850px; 
-            margin-bottom: 20px; 
-            z-index: 100; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+
+        #controls {
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            width: 850px;
+            margin-bottom: 20px;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             box-sizing: border-box;
         }
         input[type="text"] { width: 100%; padding: 12px; font-size: 18px; margin-bottom: 10px; box-sizing: border-box; border: 2px solid #007bff; border-radius: 6px; }
         textarea { width: 100%; height: 100px; margin-bottom: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        
+
         #paper {
             width: 210mm;
             height: 297mm;
@@ -51,7 +51,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
             word-wrap: break-word;
             word-break: break-all;
             overflow: hidden;
@@ -61,7 +61,7 @@
         .lyrics-title { font-weight: 900; margin-bottom: 0.3em; display: block; line-height: 1.1; }
 
         button { padding: 12px 25px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 6px; }
-        
+
         /* 贊助區塊樣式 */
         .sponsor-section {
             margin-top: 20px;
@@ -88,11 +88,11 @@
             @page { size: A4; margin: 0; }
             body { background: white; padding: 0; margin: 0; display: block; }
             #controls { display: none; }
-            #paper { 
-                margin: 0; 
-                border: none; 
-                box-shadow: none; 
-                width: 210mm; 
+            #paper {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                width: 210mm;
                 height: 297mm;
                 padding: 15mm;
                 page-break-after: avoid;
@@ -125,6 +125,40 @@
 </div>
 
 <script>
+function testLayout(fontSize, useDouble, titleText, lyricContent1, lyricContent2, col1, col2) {
+    col1.style.fontSize = fontSize + "px";
+    col2.style.fontSize = fontSize + "px";
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'lyrics-title';
+    titleSpan.style.fontSize = (fontSize + 5) + "px";
+    titleSpan.textContent = titleText;
+
+    if (useDouble) {
+        col1.replaceChildren(titleSpan, document.createTextNode(lyricContent1));
+        col2.replaceChildren(document.createTextNode(lyricContent2));
+    } else {
+        col1.replaceChildren(titleSpan, document.createTextNode(lyricContent1));
+        col2.replaceChildren();
+    }
+
+    return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
+}
+
+function findBestFontSize(useDouble, titleText, lyricContent1, lyricContent2, col1, col2) {
+    let min = 10, max = 100, best = 10;
+    while(min <= max) {
+        let m = Math.floor((min + max) / 2);
+        if(testLayout(m, useDouble, titleText, lyricContent1, lyricContent2, col1, col2)) {
+            best = m;
+            min = m + 1;
+        } else {
+            max = m - 1;
+        }
+    }
+    return best;
+}
+
 function calculateLayout() {
     const titleText = document.getElementById('titleInput').value.trim();
     const lyricsText = document.getElementById('lyricsInput').value.trim();
@@ -133,45 +167,31 @@ function calculateLayout() {
     const col1 = document.getElementById('col1');
     const col2 = document.getElementById('col2');
     const lines = lyricsText.split('\n');
-    
-    function testLayout(fontSize, useDouble) {
-        col1.style.fontSize = fontSize + "px";
-        col2.style.fontSize = fontSize + "px";
-        const mid = Math.ceil(lines.length / 2);
-        
-        if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
-            col2.innerHTML = lines.slice(mid).join('\n');
-        } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
-            col2.innerHTML = '';
-        }
-        
-        return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
-    }
+    const mid = Math.ceil(lines.length / 2);
 
-    let sMin = 10, sMax = 100, bestS = 10;
-    while(sMin <= sMax) {
-        let m = Math.floor((sMin+sMax)/2);
-        if(testLayout(m, false)) { bestS = m; sMin = m+1; } else { sMax = m-1; }
-    }
+    const singleLyrics = lines.join('\n');
+    const doubleLyrics1 = lines.slice(0, mid).join('\n');
+    const doubleLyrics2 = lines.slice(mid).join('\n');
 
-    let dMin = 10, dMax = 100, bestD = 10;
-    while(dMin <= dMax) {
-        let m = Math.floor((dMin+dMax)/2);
-        if(testLayout(m, true)) { bestD = m; dMin = m+1; } else { dMax = m-1; }
-    }
+    const bestS = findBestFontSize(false, titleText, singleLyrics, '', col1, col2);
+    const bestD = findBestFontSize(true, titleText, doubleLyrics1, doubleLyrics2, col1, col2);
 
     let finalSize, finalDouble;
+    let finalL1, finalL2;
+
     if (bestD > bestS + 4) {
         finalSize = bestD;
         finalDouble = true;
+        finalL1 = doubleLyrics1;
+        finalL2 = doubleLyrics2;
     } else {
         finalSize = bestS;
         finalDouble = false;
+        finalL1 = singleLyrics;
+        finalL2 = '';
     }
 
-    testLayout(finalSize, finalDouble);
+    testLayout(finalSize, finalDouble, titleText, finalL1, finalL2, col1, col2);
     document.getElementById('info').innerText = `目前狀態：${finalDouble ? '雙欄' : '單欄'}排版 | 歌詞字體: ${finalSize}px`;
 }
 </script>
