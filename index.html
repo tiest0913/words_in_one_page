@@ -133,18 +133,26 @@ function calculateLayout() {
     const col1 = document.getElementById('col1');
     const col2 = document.getElementById('col2');
     const lines = lyricsText.split('\n');
+    const mid = Math.ceil(lines.length / 2);
+    const lyricsSingle = lines.join('\n');
+    const lyricsDouble1 = lines.slice(0, mid).join('\n');
+    const lyricsDouble2 = lines.slice(mid).join('\n');
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'lyrics-title';
+    titleSpan.textContent = titleText;
     
     function testLayout(fontSize, useDouble) {
         col1.style.fontSize = fontSize + "px";
         col2.style.fontSize = fontSize + "px";
-        const mid = Math.ceil(lines.length / 2);
+        titleSpan.style.fontSize = (fontSize + 5) + "px";
         
         if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
-            col2.innerHTML = lines.slice(mid).join('\n');
+            col1.replaceChildren(titleSpan, document.createTextNode(lyricsDouble1));
+            col2.textContent = lyricsDouble2;
         } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
-            col2.innerHTML = '';
+            col1.replaceChildren(titleSpan, document.createTextNode(lyricsSingle));
+            col2.textContent = '';
         }
         
         return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
