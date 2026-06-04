@@ -134,17 +134,34 @@ function calculateLayout() {
     const col2 = document.getElementById('col2');
     const lines = lyricsText.split('\n');
     
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'lyrics-title';
+    titleSpan.textContent = titleText;
+
+    const mid = Math.ceil(lines.length / 2);
+    const lyricsFull = lines.join('\n');
+    const lyricsPart1 = lines.slice(0, mid).join('\n');
+    const lyricsPart2 = lines.slice(mid).join('\n');
+
+    let lastLayoutMode = null;
+
     function testLayout(fontSize, useDouble) {
         col1.style.fontSize = fontSize + "px";
         col2.style.fontSize = fontSize + "px";
-        const mid = Math.ceil(lines.length / 2);
+        titleSpan.style.fontSize = (fontSize + 5) + "px";
         
         if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
-            col2.innerHTML = lines.slice(mid).join('\n');
+            if (lastLayoutMode !== 'double') {
+                col1.replaceChildren(titleSpan, document.createTextNode(lyricsPart1));
+                col2.replaceChildren(document.createTextNode(lyricsPart2));
+                lastLayoutMode = 'double';
+            }
         } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
-            col2.innerHTML = '';
+            if (lastLayoutMode !== 'single') {
+                col1.replaceChildren(titleSpan, document.createTextNode(lyricsFull));
+                col2.replaceChildren();
+                lastLayoutMode = 'single';
+            }
         }
         
         return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
