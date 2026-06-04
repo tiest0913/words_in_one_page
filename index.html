@@ -106,8 +106,8 @@
     <input type="text" id="titleInput" placeholder="歌曲標題">
     <textarea id="lyricsInput" placeholder="貼上歌詞..."></textarea>
     <div style="display: flex; align-items: center;">
-        <button onclick="calculateLayout()">🚀 產生排版</button>
-        <button onclick="window.print()" style="background: #28a745; margin-left:10px;">🖨️ 列印</button>
+        <button id="calculateBtn" onclick="calculateLayout()">🚀 產生排版</button>
+        <button id="printBtn" onclick="window.print()" style="background: #28a745; margin-left:10px;">🖨️ 列印</button>
         <p id="info" style="margin: 0 0 0 15px; color: #666; font-size: 14px; flex-grow: 1;"></p>
     </div>
 
