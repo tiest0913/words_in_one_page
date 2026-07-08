@@ -150,17 +150,22 @@ function calculateLayout() {
         return col1.scrollHeight <= col1.offsetHeight && col2.scrollHeight <= col2.offsetHeight;
     }
 
-    let sMin = 10, sMax = 100, bestS = 10;
-    while(sMin <= sMax) {
-        let m = Math.floor((sMin+sMax)/2);
-        if(testLayout(m, false)) { bestS = m; sMin = m+1; } else { sMax = m-1; }
+    function findBestFontSize(useDouble) {
+        let min = 10, max = 100, best = 10;
+        while (min <= max) {
+            let m = Math.floor((min + max) / 2);
+            if (testLayout(m, useDouble)) {
+                best = m;
+                min = m + 1;
+            } else {
+                max = m - 1;
+            }
+        }
+        return best;
     }
 
-    let dMin = 10, dMax = 100, bestD = 10;
-    while(dMin <= dMax) {
-        let m = Math.floor((dMin+dMax)/2);
-        if(testLayout(m, true)) { bestD = m; dMin = m+1; } else { dMax = m-1; }
-    }
+    const bestS = findBestFontSize(false);
+    const bestD = findBestFontSize(true);
 
     let finalSize, finalDouble;
     if (bestD > bestS + 4) {
