@@ -133,17 +133,20 @@ function calculateLayout() {
     const col1 = document.getElementById('col1');
     const col2 = document.getElementById('col2');
     const lines = lyricsText.split('\n');
+    const mid = Math.ceil(lines.length / 2);
+    const joinedFull = lines.join("\n");
+    const joinedCol1 = lines.slice(0, mid).join("\n");
+    const joinedCol2 = lines.slice(mid).join("\n");
     
     function testLayout(fontSize, useDouble) {
         col1.style.fontSize = fontSize + "px";
         col2.style.fontSize = fontSize + "px";
-        const mid = Math.ceil(lines.length / 2);
         
         if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
-            col2.innerHTML = lines.slice(mid).join('\n');
+            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + joinedCol1;
+            col2.innerHTML = joinedCol2;
         } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
+            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + joinedFull;
             col2.innerHTML = '';
         }
         
