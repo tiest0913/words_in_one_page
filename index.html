@@ -138,12 +138,13 @@ function calculateLayout() {
         col1.style.fontSize = fontSize + "px";
         col2.style.fontSize = fontSize + "px";
         const mid = Math.ceil(lines.length / 2);
+        const titleHtml = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>`;
         
         if (useDouble) {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.slice(0, mid).join('\n');
+            col1.innerHTML = titleHtml + lines.slice(0, mid).join('\n');
             col2.innerHTML = lines.slice(mid).join('\n');
         } else {
-            col1.innerHTML = `<span class="lyrics-title" style="font-size:${fontSize+5}px">${titleText}</span>` + lines.join('\n');
+            col1.innerHTML = titleHtml + lines.join('\n');
             col2.innerHTML = '';
         }
         
